@@ -40,7 +40,7 @@ Ejemplo de respuesta correcta:
     "Escote cruzado en el frente con canal",
     "Cargaderas ajustables para mejor ajuste"
   ],
-  "code": "<body><h1>Descripción del Producto (este texto no cambia) </h1><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
+  "code": "<body><h1>Descripción del Producto</h1><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
 }
 
 IMPORTANTE: Si la descripción no tiene suficiente información, genera al menos 3 puntos clave basándote en la información proporcionada.  
@@ -49,7 +49,7 @@ No devuelvas ningún texto fuera del JSON.`;
 const openai = new OpenAI({
   // baseURL: "https://api.deepseek.com",
   // baseURL: "http://localhost:1234/v1/",
-  baseURL: "http://localhost:1234/v1/chat/",
+  baseURL: "http://localhost:1234/v1/",
   apiKey: "sk-cb409945a45d495d9310f7ccba0b33f9",
 });
 
@@ -104,17 +104,3 @@ function saveToExcel(data) {
 
 
 processExcelData();
-
-
-// curl http://localhost:1234/v1/chat/completions \
-//   -H "Content-Type: application/json" \
-//   -d '{
-//     "model": "hermes-3-llama-3.2-3b",
-//     "messages": [
-//       { "role": "system", "content": "Always answer in rhymes. Today is Thursday" },
-//       { "role": "user", "content": "What day is it today?" }
-//     ],
-//     "temperature": 0.7,
-//     "max_tokens": -1,
-//     "stream": false
-// }'
