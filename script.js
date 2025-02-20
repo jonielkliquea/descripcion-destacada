@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import * as XLSX from "xlsx";
 
-const filePath = path.resolve("src", "Booktt.xlsx");
+const filePath = path.resolve("src", "Book.xlsx");
 const fileBuffer = fs.readFileSync(filePath);
 const workbook = XLSX.read(fileBuffer, { type: "buffer" });
 
