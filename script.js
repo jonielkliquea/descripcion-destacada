@@ -32,7 +32,7 @@ const results = [];
 async function processExcelData() {
   for (const row of data) {
     const userPrompt = JSON.stringify(row, null, 2);
-    
+    console.log(userPrompt);
     try {
       const completion = await openai.chat.completions.create({
         messages: [
