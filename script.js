@@ -48,7 +48,8 @@ No devuelvas ningún texto fuera del JSON.`;
 
 const openai = new OpenAI({
   // baseURL: "https://api.deepseek.com",
-  baseURL: "http://localhost:1234/v1/",
+  // baseURL: "http://localhost:1234/v1/",
+  baseURL: "http://localhost:1234/v1/chat/",
   apiKey: "sk-cb409945a45d495d9310f7ccba0b33f9",
 });
 
@@ -65,7 +66,11 @@ async function processExcelData() {
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
         ],
-        model: "deepseek-chat",
+        // model: "deepseek-chat",
+        model: "hermes-3-llama-3.2-3b",
+        "temperature": 0.7,
+        "max_tokens": -1,
+        "stream": false,
       });
 
       const response = completion.choices[0].message.content;
@@ -99,3 +104,17 @@ function saveToExcel(data) {
 
 
 processExcelData();
+
+
+// curl http://localhost:1234/v1/chat/completions \
+//   -H "Content-Type: application/json" \
+//   -d '{
+//     "model": "hermes-3-llama-3.2-3b",
+//     "messages": [
+//       { "role": "system", "content": "Always answer in rhymes. Today is Thursday" },
+//       { "role": "user", "content": "What day is it today?" }
+//     ],
+//     "temperature": 0.7,
+//     "max_tokens": -1,
+//     "stream": false
+// }'
