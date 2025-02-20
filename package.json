@@ -1,0 +1,24 @@
+{
+  "name": "api-deepseek",
+  "version": "1.0.0",
+  "main": "src/script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./script.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "no"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "file-reader": "^1.1.1",
+    "install": "^0.13.0",
+    "npm": "^11.1.0",
+    "openai": "^4.85.2",
+    "xlsx": "^0.18.5"
+  },
+  "type": "module"
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procesar Excel con IA</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans flex justify-center items-center min-h-screen">
+  <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+    <h1 class="text-2xl font-semibold text-center mb-6">Sube tu archivo Excel</h1>
+    
+    <form id="uploadForm" class="space-y-4">
+      <div>
+        <label for="fileInput" class="block text-sm font-medium text-gray-700">Selecciona un archivo Excel</label>
+        <input type="file" id="fileInput" class="mt-2 block w-full text-sm text-gray-800 border border-gray-300 rounded-lg p-2.5" accept=".xlsx, .xls">
+      </div>
+      <div class="flex justify-center">
+        <button type="submit" class="px-6 py-2.5 text-white bg-blue-500 hover:bg-blue-600 rounded-lg" id="upload">Enviar a la IA</button>
+      </div>
+    </form>
+    <div id="responseSection" class="mt-6 hidden">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Respuesta de la IA</h2>
+      <pre id="responseText" class="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-auto"></pre>
+
+      <div class="mt-4 flex justify-center">
+        <button id="downloadBtn" class="px-6 py-2.5 text-white bg-green-500 hover:bg-green-600 rounded-lg hidden">Descargar Excel</button>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
