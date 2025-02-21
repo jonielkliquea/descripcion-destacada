@@ -32,7 +32,24 @@ Reglas estrictas:
 - Si la descripción está en HTML, conviértela en texto plano.
 - "bullet" debe contener al menos 3 elementos.
 - "code" debe ser una lista <ul> en HTML.
-- No devuelvas explicaciones, solo el JSON.`;
+- No devuelvas explicaciones, solo el JSON.
+
+Ejemplo de respuesta correcta:
+
+{
+  "Name":"nombre dado sin cambios",
+  "ProductDescription":"Mejorarlo tomando en cuenta la data suministrada",
+  "bullet": [
+    "Silueta ajustada que realza las curvas",
+    "Escote cruzado en el frente con canal",
+    "Cargaderas ajustables para mejor ajuste"
+  ],
+  "code": "<body><h1>Descripción del Producto</h1><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
+}
+
+IMPORTANTE: Si la descripción no tiene suficiente información, genera al menos 3 puntos clave basándote en la información proporcionada.  
+No devuelvas ningún texto fuera del JSON.`;
+
 
 const openai = new OpenAI({
   baseURL: "http://localhost:1234/v1/",
