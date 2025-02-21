@@ -82,7 +82,7 @@ async function processExcelData() {
         Bullet: jsonResponse.bullet.join("\n"), 
         Code: jsonResponse.code,
       });
-      console.log(results.length, "de" , row.length());
+      console.log(results.length, "de" , row.length);
     } catch (error) {
       console.error("Error procesando la fila:", error);
     }
