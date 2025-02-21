@@ -50,7 +50,6 @@ Ejemplo de respuesta correcta:
 IMPORTANTE: Si la descripción no tiene suficiente información, genera al menos 3 puntos clave basándote en la información proporcionada.  
 No devuelvas ningún texto fuera del JSON.`;
 
-
 const openai = new OpenAI({
   baseURL: "http://localhost:1234/v1/",
   apiKey: "sk-cb409945a45d495d9310f7ccba0b33f9",
