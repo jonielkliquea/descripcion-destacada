@@ -59,7 +59,7 @@ const results = [];
 async function processExcelData() {
   for (const row of data) {
     const userPrompt = JSON.stringify(row, null, 2);
-    console.log(userPrompt);
+    
     try {
       const completion = await openai.chat.completions.create({
         messages: [
@@ -74,7 +74,6 @@ async function processExcelData() {
       });
 
       const response = completion.choices[0].message.content;
-      console.log(response);
       const jsonResponse = JSON.parse(response); 
       
  
@@ -83,7 +82,7 @@ async function processExcelData() {
         Bullet: jsonResponse.bullet.join("\n"), 
         Code: jsonResponse.code,
       });
-
+      console.log(results.length(), "de" , row.length());
     } catch (error) {
       console.error("Error procesando la fila:", error);
     }
