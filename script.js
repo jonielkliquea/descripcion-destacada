@@ -52,13 +52,12 @@ async function processExcelData() {
         ],
         model: "hermes-3-llama-3.2-3b",
         temperature: 0.7,
-        max_tokens: 5000, // Valor válido
+        max_tokens: 5000,
         stream: false,
       });
 
       const response = completion.choices[0].message.content;
 
-      // Validar JSON antes de parsear
       if (!response || !response.startsWith("{")) {
         console.error(`⚠️ Respuesta no válida en fila ${index + 1}:`, response);
         continue;
@@ -67,9 +66,9 @@ async function processExcelData() {
       const jsonResponse = JSON.parse(response);
 
       results.push({
-        Name: String(jsonResponse["Name"]), // Convertir a string
+        Name: String(jsonResponse["Name"]), 
         ProductDescription: String(jsonResponse["ProductDescription"]),
-        Bullet: jsonResponse["bullet"].join("\n"), // Convertir array en texto separado por saltos de línea
+        Bullet: jsonResponse["bullet"].join("\n"),
         Code: jsonResponse["code"],
       });
 
@@ -78,7 +77,6 @@ async function processExcelData() {
       console.error(`❌ Error en fila ${index + 1}:`, error);
     }
   }
-  
   saveToExcel(results);
 }
 
