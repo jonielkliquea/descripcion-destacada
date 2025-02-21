@@ -74,7 +74,7 @@ async function processExcelData() {
 
       console.log(`✅ Procesado: ${index + 1} / ${data.length} (${((index + 1) / data.length * 100).toFixed(2)}%)`);
     } catch (error) {
-      console.error(`❌ Error en fila ${index + 1}:`, error);
+      console.error(` Error en fila ${index + 1}:`, error);
     }
   }
   saveToExcel(results);
