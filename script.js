@@ -78,7 +78,7 @@ async function processExcelData() {
       console.error(`❌ Error en fila ${index + 1}:`, error);
     }
   }
-
+  
   saveToExcel(results);
 }
 
