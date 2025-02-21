@@ -16,7 +16,7 @@ Debes convertir la descripción del producto en una lista de puntos clave en un 
 El formato de salida debe ser exactamente este:
 
 {
-  "Name":"nombre dado sin cambios",
+  "Name":"nombre dado sin cambios", 
   "ProductDescription":"Mejorarlo tomando en cuenta la data suministrada",
   "bullet": [
     "Descripción corta del punto 1",
