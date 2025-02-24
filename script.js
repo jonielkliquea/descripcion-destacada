@@ -33,6 +33,8 @@ Reglas estrictas:
 - "bullet" debe contener al menos 3 elementos.
 - "code" debe ser una lista <ul> en HTML.
 - No devuelvas explicaciones, solo el JSON.
+- En el HTML donde dice ¨nombre del dado sin cambio¨ coloca lo que viene en el parametro Name.
+- En el HTML  
 
 Ejemplo de respuesta correcta:
 
@@ -44,7 +46,8 @@ Ejemplo de respuesta correcta:
     "Escote cruzado en el frente con canal",
     "Cargaderas ajustables para mejor ajuste"
   ],
-  "code": "<body><h1>Descripción del Producto</h1><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
+  "code": "<body><h2><strong style="font-size:24px">Nombre dado sin cambios</h2><br/><p style="text-align:justify"><span style="font-size:18px">ProductDescripcion mejorada con ia</span><strong style="font-size:18px">¡Llamado a la accion, ejemplo, Elige tu color y destaca!</strong></p><br/><p><strong>Destacado</strong></p><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li
+  ><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
 }
 
 IMPORTANTE: Si la descripción no tiene suficiente información, genera al menos 3 puntos clave basándote en la información proporcionada.  
