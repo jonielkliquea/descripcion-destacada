@@ -15,16 +15,6 @@ const systemPrompt = `Eres un asistente que solo responde con un JSON estructura
 Debes convertir la descripción del producto en una lista de puntos clave en un array "bullet" y generar código HTML en "code".  
 El formato de salida debe ser exactamente este:
 
-{
-  "Name":"nombre dado sin cambios", 
-  "ProductDescription":"Mejorarlo tomando en cuenta la data suministrada",
-  "bullet": [
-    "Descripción corta del punto 1",
-    "Descripción corta del punto 2",
-    "Descripción corta del punto 3"
-  ],
-  "code": "<body>...</body>"
-}
 
 Reglas estrictas:
 - Lo dado en "Name" no cambia.
@@ -34,7 +24,6 @@ Reglas estrictas:
 - "code" debe ser una lista <ul> en HTML.
 - No devuelvas explicaciones, solo el JSON.
 - En el HTML donde dice ¨nombre del dado sin cambio¨ coloca lo que viene en el parametro Name.
-- En el HTML  
 
 Ejemplo de respuesta correcta:
 
