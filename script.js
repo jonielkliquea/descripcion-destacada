@@ -17,6 +17,8 @@ El formato de salida debe ser exactamente este:
 
 
 Reglas estrictas:
+- la estructura del JSON no cambia
+- el prodcutid no cambia
 - Lo dado en "Name" no cambia.
 - El "ProductDescription" debe ser mejorado basado en la data suministrada.
 - Si la descripción está en HTML, conviértela en texto plano.
@@ -28,6 +30,7 @@ Reglas estrictas:
 Ejemplo de respuesta correcta:
 
 {
+  "ProductId": "el productoid sin cambios",
   "Name":"nombre dado sin cambios",
   "ProductDescription":"Mejorarlo tomando en cuenta la data suministrada",
   "bullet": [
