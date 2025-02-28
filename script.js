@@ -11,40 +11,41 @@ const sheetName = workbook.SheetNames[0];
 const worksheet = workbook.Sheets[sheetName];
 const data = XLSX.utils.sheet_to_json(worksheet);
 
-const systemPrompt = `Eres un asistente que solo responde con un JSON estructurado sin ningún tipo de explicación o texto adicional.
+const systemPrompt = `
+Eres un asistente que solo responde con un JSON estructurado sin ningún tipo de explicación o texto adicional.
 Debes convertir la descripción del producto en una lista de puntos clave en un array "bullet" y generar código HTML en "code".  
+
 El formato de salida debe ser exactamente este:
 
-
 Reglas estrictas:
-- la estructura del JSON no cambia
-- el prodcutid no cambia
+- La estructura del JSON no cambia (ProductId, Name, ProductDescription, bullet, code) inicia con { y termina con }.
+- El ProductId no cambia.
 - Lo dado en "Name" no cambia.
-- El "ProductDescription" debe ser mejorado basado en la data suministrada.
+- El "ProductDescription" debe mejorarse basado en la data suministrada.
 - Si la descripción está en HTML, conviértela en texto plano.
-- "bullet" debe contener al menos 3 elementos.
-- "code" debe ser una lista <ul> en HTML.
+- "bullet" debe contener al menos 3 elementos, basados en la descripción del producto, para hacerla más atractiva.
+- El campo "code" debe ser una lista <ul> en HTML.
 - No devuelvas explicaciones, solo el JSON.
-- En el HTML donde dice ¨nombre del dado sin cambio¨ coloca lo que viene en el parametro Name.
+- En el HTML, donde dice ¨nombre del dado sin cambio¨, coloca lo que viene en el parámetro "Name".
+
+Si no puedes generar suficientes puntos clave para "bullet", debes volver a procesar la fila y asegurar que haya al menos tres puntos clave.
 
 Ejemplo de respuesta correcta:
 
 {
-  "ProductId": "el productoid sin cambios",
-  "Name":"nombre dado sin cambios",
-  "ProductDescription":"Mejorarlo tomando en cuenta la data suministrada",
+  "ProductId": "el productId sin cambios",
+  "Name": "nombre dado sin cambios",
+  "ProductDescription": "Mejorarlo tomando en cuenta la data suministrada",
   "bullet": [
     "Silueta ajustada que realza las curvas",
     "Escote cruzado en el frente con canal",
     "Cargaderas ajustables para mejor ajuste"
   ],
-  "code": "<body><h2><strong style="font-size:24px">Nombre dado sin cambios</h2><br/><p style="text-align:justify"><span style="font-size:18px">ProductDescripcion mejorada con ia</span><strong style="font-size:18px">¡Llamado a la accion, ejemplo, Elige tu color y destaca!</strong></p><br/><p><strong>Destacado</strong></p><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li
-  ><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
+  "code": "<body><h2><strong style='font-size:24px'>nombre dado sin cambios</strong></h2><br/><p style='text-align:justify'><span style='font-size:18px'>Descripción mejorada con IA</span><strong style='font-size:18px'>¡Llamado a la acción, ejemplo: Elige tu color y destaca!</strong></p><br/><p><strong>Destacado</strong></p><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
 }
 
 IMPORTANTE: Si la descripción no tiene suficiente información, genera al menos 3 puntos clave basándote en la información proporcionada.  
 No devuelvas ningún texto fuera del JSON.`;
-
 
 const openai = new OpenAI({
   baseURL: "http://localhost:1234/v1/",
@@ -82,6 +83,18 @@ async function retryOperation(row, userPrompt, retries = 0) {
     }
 
     const jsonResponse = JSON.parse(response);
+
+    // Verificar si 'bullet' está vacío o tiene menos de 3 elementos
+    if (!jsonResponse.bullet || jsonResponse.bullet.length < 3) {
+      console.error(`⚠️ "bullet" no válido o insuficiente en fila ${row.ProductId}. Volviendo a solicitar...`);
+      if (retries < maxRetries) {
+        return retryOperation(row, userPrompt, retries + 1); // Reintenta para generar los puntos claves correctamente
+      } else {
+        console.error(`❌ No se pudo obtener 'bullet' válido después de ${maxRetries} intentos.`);
+        return null;
+      }
+    }
+
     return jsonResponse;
   } catch (error) {
     console.error(`⚠️ Error en fila durante la solicitud de OpenAI:`, error);
@@ -102,6 +115,7 @@ async function processExcelData() {
 
     if (jsonResponse) {
       results.push({
+        ProductId: row.ProductId,
         Name: String(jsonResponse["Name"]),
         ProductDescription: String(jsonResponse["ProductDescription"]),
         Bullet: jsonResponse["bullet"].join("\n"),
