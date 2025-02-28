@@ -42,49 +42,75 @@ Ejemplo de respuesta correcta:
 IMPORTANTE: Si la descripción no tiene suficiente información, genera al menos 3 puntos clave basándote en la información proporcionada.  
 No devuelvas ningún texto fuera del JSON.`;
 
+
 const openai = new OpenAI({
   baseURL: "http://localhost:1234/v1/",
   apiKey: "sk-cb409945a45d495d9310f7ccba0b33f9",
 });
 
 const results = [];
+const maxRetries = 3; // Número máximo de reintentos
+
+// Función para reintentar en caso de error
+async function retryOperation(row, userPrompt, retries = 0) {
+  try {
+    const completion = await openai.chat.completions.create({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      model: "hermes-3-llama-3.2-3b",
+      temperature: 0.7,
+      max_tokens: 5000,
+      stream: false,
+    });
+
+    const response = completion.choices[0].message.content;
+
+    if (!response || !response.startsWith("{")) {
+      console.error(`⚠️ Respuesta no válida en fila:`, row);
+      if (retries < maxRetries) {
+        console.log(`⏳ Intentando nuevamente en fila... Reintentos restantes: ${maxRetries - retries}`);
+        return retryOperation(row, userPrompt, retries + 1); // Reintenta
+      } else {
+        console.error(`❌ No se pudo procesar la fila después de ${maxRetries} intentos.`);
+        return null; // Salir si se alcanzan los reintentos
+      }
+    }
+
+    const jsonResponse = JSON.parse(response);
+    return jsonResponse;
+  } catch (error) {
+    console.error(`⚠️ Error en fila durante la solicitud de OpenAI:`, error);
+    if (retries < maxRetries) {
+      console.log(`⏳ Intentando nuevamente en fila... Reintentos restantes: ${maxRetries - retries}`);
+      return retryOperation(row, userPrompt, retries + 1); // Reintenta
+    } else {
+      console.error(`❌ No se pudo procesar la fila después de ${maxRetries} intentos.`);
+      return null; // Salir si se alcanzan los reintentos
+    }
+  }
+}
 
 async function processExcelData() {
   for (const [index, row] of data.entries()) {
     const userPrompt = JSON.stringify(row, null, 2);
-    try {
-      const completion = await openai.chat.completions.create({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        model: "hermes-3-llama-3.2-3b",
-        temperature: 0.7,
-        max_tokens: 5000,
-        stream: false,
-      });
+    const jsonResponse = await retryOperation(row, userPrompt); // Intentar procesar la fila
 
-      const response = completion.choices[0].message.content;
-
-      if (!response || !response.startsWith("{")) {
-        console.error(`⚠️ Respuesta no válida en fila ${index + 1}:`, response);
-        continue;
-      }
-
-      const jsonResponse = JSON.parse(response);
-
+    if (jsonResponse) {
       results.push({
-        Name: String(jsonResponse["Name"]), 
+        Name: String(jsonResponse["Name"]),
         ProductDescription: String(jsonResponse["ProductDescription"]),
         Bullet: jsonResponse["bullet"].join("\n"),
         Code: jsonResponse["code"],
       });
 
       console.log(`✅ Procesado: ${index + 1} / ${data.length} (${((index + 1) / data.length * 100).toFixed(2)}%)`);
-    } catch (error) {
-      console.error(` Error en fila ${index + 1}:`, error);
+    } else {
+      console.error(`❌ Fila ${index + 1} no procesada correctamente después de reintentos.`);
     }
   }
+
   saveToExcel(results);
 }
 
