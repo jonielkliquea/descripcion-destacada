@@ -12,40 +12,39 @@ const worksheet = workbook.Sheets[sheetName];
 const data = XLSX.utils.sheet_to_json(worksheet);
 
 const systemPrompt = `
-Eres un asistente que solo responde con un JSON estructurado sin ningún tipo de explicación o texto adicional.
-Debes convertir la descripción del producto en una lista de puntos clave en un array "bullet" y generar código HTML en "code".  
+Eres un asistente que genera descripciones de productos en formato JSON. **No devuelvas texto adicional**, solo la respuesta en formato JSON con la estructura exacta indicada abajo.
 
-El formato de salida debe ser exactamente este:
+**Reglas estrictas**:
+- La respuesta debe ser **exclusivamente** un JSON válido, sin explicaciones ni otro texto.
+- La estructura del JSON **debe ser exactamente esta**:
+  {
+    "ProductId": "Sin cambios",
+    "Name": "Sin cambios",
+    "ProductDescription": "Mejorada basada en la descripción proporcionada",
+    "bullet": ["Punto clave 1", "Punto clave 2", "Punto clave 3"],
+    "code": "<body><h4><strong>Nombre del producto</strong></h4><br/><p><span>Descripción</span></p><br/><br><ul><li><strong>Punto clave 1:</strong> Explicación </li><li><strong>Punto clave 2:</strong> Explicación</li><li><strong>Punto clave 3:</strong> Explicación</li></ul></body>"
+  }
+- La "ProductDescription" debe mejorar la descripción original y convertir HTML en texto plano.
+- El array "bullet" debe contener al menos **3 puntos clave** sobre el producto.
+- "code" debe contener una lista <ul> en HTML siguiendo la estructura exacta dada.
+- **NO devuelvas texto adicional fuera del JSON**. Si devuelves otro texto, la respuesta será inválida.
 
-Reglas estrictas:
-- La estructura del JSON no cambia (ProductId, Name, ProductDescription, bullet, code) inicia con { y termina con }.
-- El ProductId no cambia.
-- Lo dado en "Name" no cambia.
-- El "ProductDescription" debe mejorarse basado en la data suministrada.
-- Si la descripción está en HTML, conviértela en texto plano.
-- "bullet" debe contener al menos 3 elementos, basados en la descripción del producto, para hacerla más atractiva.
-- El campo "code" debe ser una lista <ul> en HTML.
-- No devuelvas explicaciones, solo el JSON.
-- En el HTML, donde dice ¨nombre del dado sin cambio¨, coloca lo que viene en el parámetro "Name".
-
-Si no puedes generar suficientes puntos clave para "bullet", debes volver a procesar la fila y asegurar que haya al menos tres puntos clave.
-
-Ejemplo de respuesta correcta:
-
+**Ejemplo de salida esperada**:
 {
-  "ProductId": "el productId sin cambios",
-  "Name": "nombre dado sin cambios",
-  "ProductDescription": "Mejorarlo tomando en cuenta la data suministrada",
+  "ProductId": 1234,
+  "Name": "Transportador de Mascotas X",
+  "ProductDescription": "Transportador seguro y cómodo aprobado por IATA. Funciona como transportador, cama y jaula de entrenamiento.",
   "bullet": [
-    "Silueta ajustada que realza las curvas",
-    "Escote cruzado en el frente con canal",
-    "Cargaderas ajustables para mejor ajuste"
+    "Aprobado por IATA para viajes en avión.",
+    "Se convierte en cama o jaula de entrenamiento.",
+    "Sujeciones seguras para estabilidad durante el viaje."
   ],
-  "code": "<body><h2><strong style='font-size:24px'>nombre dado sin cambios</strong></h2><br/><p style='text-align:justify'><span style='font-size:18px'>Descripción mejorada con IA</span><strong style='font-size:18px'>¡Llamado a la acción, ejemplo: Elige tu color y destaca!</strong></p><br/><p><strong>Destacado</strong></p><ul><li><strong>Silueta ajustada:</strong> Realza las curvas.</li><li><strong>Escote cruzado:</strong> Agrega sofisticación.</li><li><strong>Cargaderas ajustables:</strong> Para mayor comodidad.</li></ul></body>"
+  "code": "<body><h4><strong>Transportador de Mascotas X</strong></h4><br/><p><span>Descripción</span></p><br/><br><ul><li><strong>Aprobado por IATA:</strong> Viajes seguros en avión.</li><li><strong>Versátil:</strong> Transportador, cama o jaula de entrenamiento.</li><li><strong>Diseño seguro:</strong> Sujeciones para estabilidad.</li></ul></body>"
 }
 
-IMPORTANTE: Si la descripción no tiene suficiente información, genera al menos 3 puntos clave basándote en la información proporcionada.  
-No devuelvas ningún texto fuera del JSON.`;
+**IMPORTANTE**: La salida debe comenzar con { y terminar con }. Si generas algo diferente, la respuesta será rechazada.
+`;
+
 
 const openai = new OpenAI({
   baseURL: "http://localhost:1234/v1/",
@@ -53,9 +52,8 @@ const openai = new OpenAI({
 });
 
 const results = [];
-const maxRetries = 3; // Número máximo de reintentos
+const maxRetries = 5;
 
-// Función para reintentar en caso de error
 async function retryOperation(row, userPrompt, retries = 0) {
   try {
     const completion = await openai.chat.completions.create({
@@ -67,6 +65,7 @@ async function retryOperation(row, userPrompt, retries = 0) {
       temperature: 0.7,
       max_tokens: 5000,
       stream: false,
+      show_reasoning:false,
     });
 
     const response = completion.choices[0].message.content;
@@ -75,20 +74,20 @@ async function retryOperation(row, userPrompt, retries = 0) {
       console.error(`⚠️ Respuesta no válida en fila:`, row);
       if (retries < maxRetries) {
         console.log(`⏳ Intentando nuevamente en fila... Reintentos restantes: ${maxRetries - retries}`);
-        return retryOperation(row, userPrompt, retries + 1); // Reintenta
+        return retryOperation(row, userPrompt, retries + 1); 
       } else {
         console.error(`❌ No se pudo procesar la fila después de ${maxRetries} intentos.`);
-        return null; // Salir si se alcanzan los reintentos
+        return null; 
       }
     }
 
     const jsonResponse = JSON.parse(response);
 
-    // Verificar si 'bullet' está vacío o tiene menos de 3 elementos
+
     if (!jsonResponse.bullet || jsonResponse.bullet.length < 3) {
       console.error(`⚠️ "bullet" no válido o insuficiente en fila ${row.ProductId}. Volviendo a solicitar...`);
       if (retries < maxRetries) {
-        return retryOperation(row, userPrompt, retries + 1); // Reintenta para generar los puntos claves correctamente
+        return retryOperation(row, userPrompt, retries + 1); 
       } else {
         console.error(`❌ No se pudo obtener 'bullet' válido después de ${maxRetries} intentos.`);
         return null;
@@ -100,10 +99,10 @@ async function retryOperation(row, userPrompt, retries = 0) {
     console.error(`⚠️ Error en fila durante la solicitud de OpenAI:`, error);
     if (retries < maxRetries) {
       console.log(`⏳ Intentando nuevamente en fila... Reintentos restantes: ${maxRetries - retries}`);
-      return retryOperation(row, userPrompt, retries + 1); // Reintenta
+      return retryOperation(row, userPrompt, retries + 1);
     } else {
       console.error(`❌ No se pudo procesar la fila después de ${maxRetries} intentos.`);
-      return null; // Salir si se alcanzan los reintentos
+      return null; 
     }
   }
 }
@@ -111,7 +110,7 @@ async function retryOperation(row, userPrompt, retries = 0) {
 async function processExcelData() {
   for (const [index, row] of data.entries()) {
     const userPrompt = JSON.stringify(row, null, 2);
-    const jsonResponse = await retryOperation(row, userPrompt); // Intentar procesar la fila
+    const jsonResponse = await retryOperation(row, userPrompt); 
 
     if (jsonResponse) {
       results.push({
